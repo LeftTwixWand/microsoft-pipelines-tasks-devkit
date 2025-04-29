@@ -11,12 +11,18 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
   private _onDidChangeTreeData = new vscode.EventEmitter<TaskItem | undefined>();
   readonly onDidChangeTreeData: vscode.Event<TaskItem | undefined> = this._onDidChangeTreeData.event;
 
-  private tasks: TaskItem[] = [];
+  private items: TaskItem[] = [];
 
   constructor() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
-      vscode.window.showInformationMessage('No workspace folder open.');
+      vscode.window.showInformationMessage('No workspace folder open.',
+        'Open Folder'
+      ).then(selection => {
+        if (selection === 'Open Folder') {
+          vscode.commands.executeCommand('vscode.openFolder');
+        }
+      });
       return;
     }
 
@@ -35,7 +41,7 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
   }
 
   getChildren() {
-    return Promise.resolve(this.tasks);
+    return Promise.resolve(this.items);
   }
 
   toggleTaskSelection(taskItem: TaskItem): void {
@@ -43,10 +49,8 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
     this._onDidChangeTreeData.fire(taskItem);
   }
 
-  getSelectedTasks(): string[] {
-    return this.tasks
-      .filter(taskItem => taskItem.checked)
-      .map(taskItem => taskItem.label);
+  getSelectedTasks(): TaskItem[] {
+    return this.items.filter(taskItem => taskItem.checked);
   }
 
   private initTasks() {
@@ -73,6 +77,6 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
     const tasks = readdirSync(tasksDir)
       .filter(task => existsSync(join(tasksDir, task, 'task.json')));
 
-    this.tasks = tasks.map(x => new TaskItem(x, join(tasksDir, x)));
+    this.items = tasks.map(x => new TaskItem(x, join(tasksDir, x)));
   }
 }

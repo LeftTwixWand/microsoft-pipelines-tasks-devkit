@@ -97,6 +97,10 @@
         "command": "tasksDevKit.logout",
         "title": "Logout from Azure DevOps",
         "icon": "$(sign-out)"
+      },
+      {
+        "command": "tasksDevKit.openTheTaskInFolderStructure",
+        "title": "Open the task in folder structure"
       }
     ],
     "menus": {
@@ -109,12 +113,19 @@
         {
           "command": "tasksDevKit.test",
           "when": "view == tasksDevKit.tasks",
-          "group": "navigation@3"
+          "group": "navigation@2"
         },
         {
           "command": "tasksDevKit.deploy",
           "when": "view == tasksDevKit.tasks",
-          "group": "navigation@4"
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "tasksDevKit.openTheTaskInFolderStructure",
+          "when": "viewItem == taskItem",
+          "group": "navigation-task-item-context"
         }
       ]
     }
