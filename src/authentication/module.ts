@@ -1,45 +1,49 @@
 import * as vscode from 'vscode';
 
 import { AzureDevOpsAuthenticationProvider } from './AzureDevOps/AzureDevOpsAuthenticationProvider';
+import { AzureDevOpsOAuthProvider } from './AzureDevOps/AzureDevOpsOAuthProvider';
 
 export class AuthenticationModule {
-  readonly authProvider: AzureDevOpsAuthenticationProvider;
+  readonly oauthAuthProvider: AzureDevOpsOAuthProvider;
 
   constructor(context: vscode.ExtensionContext) {
-    this.authProvider = new AzureDevOpsAuthenticationProvider(context.secrets);
+    this.oauthAuthProvider = new AzureDevOpsOAuthProvider(context.secrets);
   }
 
-  registerAuthenticationProvider(): vscode.Disposable {
-    return vscode.authentication.registerAuthenticationProvider(
-      AzureDevOpsAuthenticationProvider.id,
-      'Azure DevOps PAT',
-      this.authProvider,
-      { supportsMultipleAccounts: false },
-    );
+  registerAuthenticationProvider(): vscode.Disposable[] {
+    return [
+      vscode.authentication.registerAuthenticationProvider(
+        AzureDevOpsOAuthProvider.id,
+        'Azure DevOps',
+        this.oauthAuthProvider,
+        { supportsMultipleAccounts: false },
+      ),
+    ];
   }
 
   registerLoginCommand(): vscode.Disposable {
     return vscode.commands.registerCommand('tasksDevKit.login', async () => {
       try {
-        await vscode.authentication.getSession(AzureDevOpsAuthenticationProvider.id, [], { createIfNone: true });
+        await vscode.authentication.getSession(AzureDevOpsOAuthProvider.id, [], { createIfNone: true });
         vscode.window.showInformationMessage('Successfully logged in to Azure DevOps.');
       } catch (e: any) {
-        vscode.window.showErrorMessage(`Login failed: ${e.message}`);
+        vscode.window.showErrorMessage(`OAuth login failed: ${e.message}. Falling back to PAT login.`);
       }
     });
   }
 
   registerLogoutCommand(): vscode.Disposable {
     return vscode.commands.registerCommand('tasksDevKit.logout', async () => {
-      const session = await vscode.authentication.getSession(AzureDevOpsAuthenticationProvider.id, [], {
+      // Try to get OAuth session first
+      let session = await vscode.authentication.getSession(AzureDevOpsOAuthProvider.id, [], {
         createIfNone: false,
       });
 
-      if (session === undefined) {
-        vscode.window.showInformationMessage('You are not logged in.');
-      } else {
-        await this.authProvider.removeSession(session.id);
+      if (session) {
+        // Logout from OAuth
+        await this.oauthAuthProvider.removeSession(session.id);
         vscode.window.showInformationMessage('Successfully logged out of Azure DevOps.');
+        return;
       }
     });
   }

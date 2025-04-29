@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
   const tasksModule = new TasksModule(context);
 
   context.subscriptions.push(
-    authenticationModule.registerAuthenticationProvider(),
+    ...authenticationModule.registerAuthenticationProvider(),
     authenticationModule.registerLoginCommand(),
     authenticationModule.registerLogoutCommand(),
     ...tasksModule.registerCommands(),

@@ -57,7 +57,7 @@
     "viewsWelcome": [
       {
         "view": "tasksDevKit.settings",
-        "contents": "In order to upload tasks to your organization, you need to be logged in TFX.\n[Login to TFX](command:tasksDevKit.login)",
+        "contents": "In order to upload tasks to your organization, you need to be logged in to Azure DevOps.\n[Login to Azure DevOps](command:tasksDevKit.login)",
         "when": "tasksDevKit.tfx.signed-in === false"
       },
       {
@@ -70,6 +70,10 @@
       {
         "id": "azuredevopspat",
         "label": "Azure DevOps PAT"
+      },
+      {
+        "id": "azuredevopsoauth",
+        "label": "Azure DevOps"
       }
     ],
     "commands": [
@@ -144,12 +148,17 @@
     "lint": "eslint src",
     "test": "vscode-test"
   },
+  "dependencies": {
+    "azure-devops-node-api": "^14.1.0",
+    "uuid": "^11.1.0"
+  },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.15.3",
+    "@types/uuid": "^10.0.0",
     "@types/vscode": "^1.99.1",
-    "@typescript-eslint/eslint-plugin": "^8.31.0",
-    "@typescript-eslint/parser": "^8.31.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.25.3",
