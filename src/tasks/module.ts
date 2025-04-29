@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import { TasksProvider } from './TasksProvider';
 import { TaskItem } from './TaskItem';
-import { DebugProfilesGenerator } from './DebugProfileGenrator';
 
 export class TasksModule {
   readonly tasksProvider: TasksProvider;
@@ -21,13 +20,6 @@ export class TasksModule {
   registerBuildCommand(): vscode.Disposable {
     return vscode.commands.registerCommand('tasksDevKit.build', () => {
       this.executeTasks('build', this.tasksProvider.getSelectedTasks());
-    });
-  }
-
-  registerGenerateDebugProfileCommand(): vscode.Disposable {
-    return vscode.commands.registerCommand('tasksDevKit.generateDebugProfile', () => {
-      DebugProfilesGenerator.generateDebugProfiles(this.tasksProvider.getSelectedTasks());
-      DebugProfilesGenerator.createEnvFiles(this.tasksProvider.getSelectedTasks());
     });
   }
 

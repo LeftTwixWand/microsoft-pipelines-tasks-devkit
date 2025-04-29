@@ -12,7 +12,6 @@ export function activate(context: vscode.ExtensionContext) {
     authenticationModule.registerLoginCommand(),
     authenticationModule.registerLogoutCommand(),
     tasksModule.registerToggleTaskCommand(),
-    tasksModule.registerGenerateDebugProfileCommand(),
     tasksModule.registerBuildCommand(),
     tasksModule.registerTestCommand(),
     tasksModule.registerDeployCommand(),
