@@ -57,7 +57,12 @@ export class TasksModule {
 
         const workspaceFolders = vscode.workspace.workspaceFolders;
         const agentTasksFolder = join(this.context.storageUri!.fsPath, "agent/_work/_tasks");
-        console.log(agentTasksFolder);
+
+        if (!existsSync(agentTasksFolder)) {
+          vscode.window.showErrorMessage(`Agent tasks folder does not exist: ${agentTasksFolder}`);
+          return;
+        }
+
         selectedTasks.forEach(task => {
           const path = join(agentTasksFolder, task.getWorkName());
           if (existsSync(path)) {
