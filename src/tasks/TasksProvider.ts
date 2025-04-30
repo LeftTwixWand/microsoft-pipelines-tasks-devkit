@@ -5,13 +5,23 @@ import vscode from 'vscode';
 
 import { TaskItem } from './TaskItem';
 
-export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
+class CategoryItem extends vscode.TreeItem {
+    constructor(
+        public readonly category: string,
+        public readonly childrenItems: TaskItem[]
+    ) {
+        super(category, vscode.TreeItemCollapsibleState.Collapsed);
+        this.contextValue = 'categoryItem';
+    }
+}
+
+export class TasksProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   private workspaceRoot: string = '';
 
-  private _onDidChangeTreeData = new vscode.EventEmitter<TaskItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<TaskItem | undefined> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData = new vscode.EventEmitter<vscode.TreeItem | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
-  private items: TaskItem[] = [];
+  private tasks: TaskItem[] = [];
 
   constructor() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -36,12 +46,24 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  getTreeItem(element: TaskItem): vscode.TreeItem {
+  getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
     return element;
   }
 
-  getChildren() {
-    return Promise.resolve(this.items);
+  getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
+    if (!element) {
+      const groups = Array.from(new Set(this.tasks.map(task => task.object.name)));
+      const nameItems = groups.map(name =>
+        new CategoryItem(name, this.tasks.filter(task => task.object.name === name))
+      );
+      return Promise.resolve(nameItems);
+    }
+
+    if (element instanceof CategoryItem) {
+      return Promise.resolve(element.childrenItems);
+    }
+
+    return Promise.resolve([]);
   }
 
   toggleTaskSelection(taskItem: TaskItem): void {
@@ -50,7 +72,7 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
   }
 
   getSelectedTasks(): TaskItem[] {
-    return this.items.filter(taskItem => taskItem.checked);
+    return this.tasks.filter(taskItem => taskItem.checked);
   }
 
   private initTasks() {
@@ -77,6 +99,6 @@ export class TasksProvider implements vscode.TreeDataProvider<TaskItem> {
     const tasks = readdirSync(tasksDir)
       .filter(task => existsSync(join(tasksDir, task, 'task.json')));
 
-    this.items = tasks.map(x => new TaskItem(x, join(tasksDir, x)));
+    this.tasks = tasks.map(x => new TaskItem(x, join(tasksDir, x)));
   }
 }
